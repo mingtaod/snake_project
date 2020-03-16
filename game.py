@@ -77,10 +77,10 @@ def start(x, y):
         if fcoord[2] == 0:
             food(tfood)
             fcoord[2] = 1
-        turtle.onkey(u, "Up")
-        turtle.onkey(l, "Left")
-        turtle.onkey(r, "Right")
-        turtle.onkey(d, "Down")
+        turtle.onkey(up, "Up")
+        turtle.onkey(left, "Left")
+        turtle.onkey(right, "Right")
+        turtle.onkey(down, "Down")
         turtle.listen()
         move()
         x = turtle.xcor()
@@ -118,7 +118,7 @@ def food(tfood):
 
 
 # Up
-def u():
+def up():
     if h[0] == 270:
         pass
     else:
@@ -126,7 +126,7 @@ def u():
 
 
 # Down
-def d():
+def down():
     if h[0] == 90:
         pass
     else:
@@ -134,7 +134,7 @@ def d():
 
 
 # Left
-def l():
+def left():
     if h[0] == 0:
         pass
     else:
@@ -142,7 +142,7 @@ def l():
 
 
 # Right
-def r():
+def right():
     if h[0] == 180:
         pass
     else:
@@ -160,11 +160,15 @@ def move():
     turtle.fd(20)
     x = turtle.xcor()
     y = turtle.ycor()
+
+    # Normal state: b = a + 1
     if b[0] > a[0]:
         turtle.clearstamps(1)
         pos.insert(0, [round(x), round(y)])
         pos.pop(-1)
+
     else:
+        # get scored in start, but onz
         pos.insert(0, [round(x), round(y)])
         b[0] += 1
 
