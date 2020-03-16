@@ -1,170 +1,191 @@
-"""
-Snake Eater
-Made with PyGame
-"""
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#                        Dinis Marques                            #
+#                         Snake Python                            #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+import turtle
+import random
 
-import pygame, sys, time, random
+# head orientation
+h = [0]
 
+# score
+a = [0]
+b = [0]
 
-# Difficulty settings
-# Easy      ->  10
-# Medium    ->  25
-# Hard      ->  40
-# Harder    ->  60
-# Impossible->  120
-difficulty = 25
+# food coord
+fcoord = [0, 0, 0]
 
-# Window size
-frame_size_x = 720
-frame_size_y = 480
-
-# Checks for errors encountered
-check_errors = pygame.init()
-# pygame.init() example output -> (6, 0)
-# second number in tuple gives number of errors
-if check_errors[1] > 0:
-    print(f'[!] Had {check_errors[1]} errors when initialising game, exiting...')
-    sys.exit(-1)
-else:
-    print('[+] Game successfully initialised')
+# position
+pos = []
 
 
-# Initialise game window
-pygame.display.set_caption('Snake Eater')
-game_window = pygame.display.set_mode((frame_size_x, frame_size_y))
+def home(x, y):
+    x = 0
+    y = 0
+    a[0] = 0
+    b[0] = 0
+    h[0] = 0
+    fcoord[2] = 0
+    pos[:] = []
+    turtle.hideturtle()
+    turtle.clear()
+    turtle.pu()
+    turtle.color("black")
+    turtle.goto(0, 0)
+    turtle.write("Play")
+    turtle.title("Snake")
+    turtle.onscreenclick(start)
+    turtle.mainloop()
 
 
-# Colors (R, G, B)
-black = pygame.Color(0, 0, 0)
-white = pygame.Color(255, 255, 255)
-red = pygame.Color(255, 0, 0)
-green = pygame.Color(0, 255, 0)
-blue = pygame.Color(0, 0, 255)
+def level_1():
+    turtle.clear()
+    turtle.pu()
+    turtle.speed(0)
+    turtle.pensize(20)
+    turtle.color("grey")
+    turtle.goto(-220, 220)
+    turtle.pd()
+    turtle.goto(220, 220)
+    turtle.goto(220, -220)
+    turtle.goto(-220, -220)
+    turtle.goto(-220, 220)
+    turtle.pu()
+    turtle.goto(0, 0)
 
 
-# FPS (frames per second) controller
-fps_controller = pygame.time.Clock()
+def start(x, y):
+    turtle.onscreenclick(None)
+
+    level_1()
+
+    tfood = turtle.Turtle()
+    tfood.hideturtle()
+    tfood.pu()
+    tfood.speed(0)
+    tfood.shape("square")
+    tfood.color("red")
+
+    tscore = turtle.Turtle()
+    tscore.hideturtle()
+    tscore.pu()
+    tscore.speed(0)
+    tscore.goto(100, -250)
+    tscore.write("Score:" + str(a[0]), align="center", font=(10))
+
+    while x > -210 and x < 210 and y > -210 and y < 210:
+        if fcoord[2] == 0:
+            food(tfood)
+            fcoord[2] = 1
+        turtle.onkey(u, "Up")
+        turtle.onkey(l, "Left")
+        turtle.onkey(r, "Right")
+        turtle.onkey(d, "Down")
+        turtle.listen()
+        move()
+        x = turtle.xcor()
+        y = turtle.ycor()
+        if x > fcoord[0] * 20 - 5 and x < fcoord[0] * 20 + 5 and y > fcoord[1] * 20 - 5 and y < fcoord[1] * 20 + 5:
+            fcoord[2] = 0
+            tfood.clear()
+            a[0] += 1
+            tscore.clear()
+            tscore.write("Score:" + str(a[0]), align="center", font=(10))
+
+        if len(pos) > 1:
+            for i in range(1, len(pos)):
+                if x < pos[i][0] + 5 and x > pos[i][0] - 5 and y < pos[i][1] + 5 and y > pos[i][1] - 5:
+                    tscore.clear()
+                    tfood.clear()
+                    gameover()
+    tscore.clear()
+    tfood.clear()
+    gameover()
 
 
-# Game variables
-snake_pos = [100, 50]
-snake_body = [[100, 50], [100-10, 50], [100-(2*10), 50]]
-
-food_pos = [random.randrange(1, (frame_size_x//10)) * 10, random.randrange(1, (frame_size_y//10)) * 10]
-food_spawn = True
-
-direction = 'RIGHT'
-change_to = direction
-
-score = 0
-
-
-# Game Over
-def game_over():
-    my_font = pygame.font.SysFont('times new roman', 90)
-    game_over_surface = my_font.render('YOU DIED', True, red)
-    game_over_rect = game_over_surface.get_rect()
-    game_over_rect.midtop = (frame_size_x/2, frame_size_y/4)
-    game_window.fill(black)
-    game_window.blit(game_over_surface, game_over_rect)
-    show_score(0, red, 'times', 20)
-    pygame.display.flip()
-    time.sleep(3)
-    pygame.quit()
-    sys.exit()
+# Food
+def food(tfood):
+    x = random.randrange(-8, 8, 1)
+    y = random.randrange(-8, 8, 1)
+    fcoord[0] = x
+    fcoord[1] = y
+    tfood.hideturtle()
+    tfood.pu()
+    tfood.shape("square")
+    tfood.color("red")
+    tfood.goto(x * 20, y * 20)
+    tfood.stamp()
 
 
-# Score
-def show_score(choice, color, font, size):
-    score_font = pygame.font.SysFont(font, size)
-    score_surface = score_font.render('Score : ' + str(score), True, color)
-    score_rect = score_surface.get_rect()
-    if choice == 1:
-        score_rect.midtop = (frame_size_x/10, 15)
+# Up
+def u():
+    if h[0] == 270:
+        pass
     else:
-        score_rect.midtop = (frame_size_x/2, frame_size_y/1.25)
-    game_window.blit(score_surface, score_rect)
-    # pygame.display.flip()
+        h[0] = 90
 
 
-# Main logic
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        # Whenever a key is pressed down
-        elif event.type == pygame.KEYDOWN:
-            # W -> Up; S -> Down; A -> Left; D -> Right
-            if event.key == pygame.K_UP or event.key == ord('w'):
-                change_to = 'UP'
-            if event.key == pygame.K_DOWN or event.key == ord('s'):
-                change_to = 'DOWN'
-            if event.key == pygame.K_LEFT or event.key == ord('a'):
-                change_to = 'LEFT'
-            if event.key == pygame.K_RIGHT or event.key == ord('d'):
-                change_to = 'RIGHT'
-            # Esc -> Create event to quit the game
-            if event.key == pygame.K_ESCAPE:
-                pygame.event.post(pygame.event.Event(pygame.QUIT))
-
-    # Making sure the snake cannot move in the opposite direction instantaneously
-    if change_to == 'UP' and direction != 'DOWN':
-        direction = 'UP'
-    if change_to == 'DOWN' and direction != 'UP':
-        direction = 'DOWN'
-    if change_to == 'LEFT' and direction != 'RIGHT':
-        direction = 'LEFT'
-    if change_to == 'RIGHT' and direction != 'LEFT':
-        direction = 'RIGHT'
-
-    # Moving the snake
-    if direction == 'UP':
-        snake_pos[1] -= 10
-    if direction == 'DOWN':
-        snake_pos[1] += 10
-    if direction == 'LEFT':
-        snake_pos[0] -= 10
-    if direction == 'RIGHT':
-        snake_pos[0] += 10
-
-    # Snake body growing mechanism
-    snake_body.insert(0, list(snake_pos))
-    if snake_pos[0] == food_pos[0] and snake_pos[1] == food_pos[1]:
-        score += 1
-        food_spawn = False
+# Down
+def d():
+    if h[0] == 90:
+        pass
     else:
-        snake_body.pop()
+        h[0] = 270
 
-    # Spawning food on the screen
-    if not food_spawn:
-        food_pos = [random.randrange(1, (frame_size_x//10)) * 10, random.randrange(1, (frame_size_y//10)) * 10]
-    food_spawn = True
 
-    # GFX
-    game_window.fill(black)
-    for pos in snake_body:
-        # Snake body
-        # .draw.rect(play_surface, color, xy-coordinate)
-        # xy-coordinate -> .Rect(x, y, size_x, size_y)
-        pygame.draw.rect(game_window, green, pygame.Rect(pos[0], pos[1], 10, 10))
+# Left
+def l():
+    if h[0] == 0:
+        pass
+    else:
+        h[0] = 180
 
-    # Snake food
-    pygame.draw.rect(game_window, white, pygame.Rect(food_pos[0], food_pos[1], 10, 10))
 
-    # Game Over conditions
-    # Getting out of bounds
-    if snake_pos[0] < 0 or snake_pos[0] > frame_size_x-10:
-        game_over()
-    if snake_pos[1] < 0 or snake_pos[1] > frame_size_y-10:
-        game_over()
-    # Touching the snake body
-    for block in snake_body[1:]:
-        if snake_pos[0] == block[0] and snake_pos[1] == block[1]:
-            game_over()
+# Right
+def r():
+    if h[0] == 180:
+        pass
+    else:
+        h[0] = 0
 
-    show_score(1, white, 'consolas', 20)
-    # Refresh game screen
-    pygame.display.update()
-    # Refresh rate
-    fps_controller.tick(difficulty)
+
+def move():
+    turtle.pensize(1)
+    turtle.color("black")
+    turtle.pu()
+    turtle.speed(3)
+    turtle.setheading(h[0])
+    turtle.shape("square")
+    turtle.stamp()
+    turtle.fd(20)
+    x = turtle.xcor()
+    y = turtle.ycor()
+    if b[0] > a[0]:
+        turtle.clearstamps(1)
+        pos.insert(0, [round(x), round(y)])
+        pos.pop(-1)
+    else:
+        pos.insert(0, [round(x), round(y)])
+        b[0] += 1
+
+
+def gameover():
+    turtle.onscreenclick(None)
+    turtle.speed(0)
+    turtle.pu()
+    turtle.goto(0, 150)
+    turtle.color("red")
+    turtle.write("Game Over", align="center", font=(10))
+    turtle.goto(0, 50)
+    turtle.write("Score:" + str(a[0]), align="center", font=(10))
+    turtle.goto(200, -200)
+    turtle.write("(Click anywhere to return to the main menu)", align="right", font=(0.0000001))
+    turtle.onscreenclick(home)
+    turtle.mainloop()
+
+
+# # # # # # # # # # # # # # # # # # # # # #
+# Main                                    #
+# # # # # # # # # # # # # # # # # # # # # #
+if __name__ == '__main__':
+    home(0, 0)
